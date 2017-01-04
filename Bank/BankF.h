@@ -7,11 +7,12 @@ int Available[MAXRESOURCE];         //可用资源向量
 int Max[MAXPROCESS][MAXRESOURCE];   //最大需求矩阵  
 int Allocation[MAXPROCESS][MAXRESOURCE];  //分配矩阵  
 int Need[MAXPROCESS][MAXRESOURCE];        //需求矩阵  
-int Request[MAXPROCESS][MAXRESOURCE];     //请求向量  
+
+int Request[MAXRESOURCE];      //请求向量  
  
-int Work[MAXRESOURCE];       //工作向量  
+int Work[MAXRESOURCE];         //工作向量  
 bool Finish[MAXPROCESS]; 
-int SafeSeries[MAXPROCESS];  //安全序列  
+int SafeSeries[MAXPROCESS];    //安全序列  
 
 int n;   //进程数  
 int m;   //资源数  
@@ -41,32 +42,29 @@ void Init()
 	{  
 		for( j = 0; j < m; ++j )  
 		{  
-			cin >> Allocation[i][j];  
-		}  
-	}  
-	printf("需求矩阵(%d*%d输入)\n",n,m); 
-	for( i = 0; i < n; ++i )  
-	{  
-		for( j = 0; j < m; ++j )  
-		{  
-			cin >> Need[i][j];  
+			cin >> Allocation[i][j]; 
+			Need[i][j] = Max[i][j] - Allocation[i][j];
 		}  
 	}  
 }  
 
 bool IsSafe()  
 {  
-	for(int i = 0; i < n; ++i)  
-	{  
-		if(!Finish[i])
-		{
-			return false; //不安全 
-		}
-	}  
-	return true;         //安全
+	int i=0;
+	for (i=0;i<n;++i)
+	{
+		if(Finish[i] == true)
+			continue;
+		else
+			break;
+	}
+	if(i == n)
+		return true;    //安全
+	else
+		return false;   //不安全
 }   
 
-bool Select(int &tmp)  
+bool Select(int &tmp,int tmpNeed[][MAXRESOURCE])  
 {  
 	//选择一个Finish[i]=false,Need[i]<=Work[i] 
 	int j=0; 
@@ -76,7 +74,7 @@ bool Select(int &tmp)
 			continue;
 		for (j=0;j<m;++j)
 		{
-			if(Need[i][j] > Work[j])
+			if(tmpNeed[i][j] > Work[j])
 				break;
 		}
 		if(j == m)
@@ -88,7 +86,7 @@ bool Select(int &tmp)
 	return false;
 }  
 
-bool Safe()  
+bool Safe(int *tmpAvail,int tmpAlloc[][MAXRESOURCE],int tmpNeed[][MAXRESOURCE])  
 {  
 	for(int i = 0; i < n; ++i)  
 	{  
@@ -96,16 +94,16 @@ bool Safe()
 	}  
 	for (int j = 0; j < m; ++j)  
 	{  
-		Work[j] = Available[j];  
+		Work[j] = tmpAvail[j];  
 	}  
 	int tmp=0;  
 	int index = 0;  
-	while(Select(tmp))  
+	while(Select(tmp,tmpNeed))  
 	{  
 		Finish[tmp] = true;  
 		for (int k = 0; k < m; ++k)  
 		{  
-			Work[k] += Allocation[tmp][k];  
+			Work[k] += tmpAlloc[tmp][k];  
 		}  
 		SafeSeries[index++] = tmp;
 	}  
@@ -115,21 +113,147 @@ bool Safe()
 		return false;   //不安全
 }   
 
-void testBank()
+void Display()
 {
-	Init();  
-	Safe();  
-	if(IsSafe())  
+	int i=0;
+	int j=0;
+	cout<<"当前可利用的资源数目"<<endl;
+	for(i = 0; i < m; ++i)  
 	{  
-		cout<<"存在一个安全序列>";  
-		for (int i = 0; i < n ; ++i)  
+		cout << Available[i]<<" ";  
+	}  
+	cout<<endl;
+	cout<<"最大需求矩阵"<<endl;
+	for(i = 0; i < n; ++i )  
+	{  
+		for( j = 0; j < m; ++j)  
 		{  
-			printf("p%d->",SafeSeries[i]);
+			cout<<Max[i][j]<<" ";
 		}  
-		cout<<"end"<<endl;
+		cout<<endl;
 	}  
-	else  
+	cout<<"分配矩阵"<<endl;
+	for( i = 0; i < n; ++i )  
 	{  
-		cout<<"无法找到一个安全序列"<<endl;
+		for( j = 0; j < m; ++j )  
+		{  
+			cout<<Allocation[i][j]<<" "; 
+		}  
+		cout<<endl;
 	}  
+	cout<<"需求矩阵"<<endl;
+	for( i = 0; i < n; ++i )  
+	{  
+		for( j = 0; j < m; ++j )  
+		{  
+			cout<<Need[i][j]<<" ";
+		}  
+		cout<<endl;
+	} 
+}
+
+void BankA()
+{
+	int i=0;
+	int index=0;
+	cout<<"请输入请求资源的进程下标>";
+	cin>>index;
+	assert(index < n && index >= 0);
+	cout<<"请输入当前的请求资源>"<<endl;
+	for (i=0;i<m;++i)
+	{
+		cin>>Request[i];
+	}
+	for (i=0;i<m;++i)
+	{
+		if(Request[i] <= Need[index][i])
+		{
+			continue;
+		}
+		else
+		{
+			cout<<"第一次试分配失败"<<endl;
+			break;
+		}
+	}
+	if(i < m)   //如果第一次试分配失败则不执行后面的语句
+	{
+		return ;
+	}
+	for(i=0;i<m;++i)
+	{
+		if(Request[i] <= Available[i])
+		{
+			continue;
+		}
+		else
+		{
+			cout<<"第二次试分配失败"<<endl;
+			break;
+		}
+	}
+	if(i < m)     //如果第二次试分配失败则不同执行后面的语句
+	{
+		return ;
+	}
+	//开始试分配
+	int tmpAvail[MAXRESOURCE]={0};
+	int tmpAlloc[MAXPROCESS][MAXRESOURCE]={0};
+	int tmpNeed[MAXPROCESS][MAXRESOURCE]={0};
+	memmove(tmpAvail,Available,sizeof(int)*MAXRESOURCE);
+	memmove(tmpAlloc,Allocation,sizeof(int)*MAXPROCESS*MAXRESOURCE);
+	memmove(tmpNeed,Need,sizeof(int)*MAXPROCESS*MAXRESOURCE);
+	for (int i=0;i<m;++i)
+	{
+		int j=0;
+		tmpAvail[i] -= Request[i];
+		tmpAlloc[index][i] += Request[i];
+		tmpNeed[index][i] -= Request[i];
+		for (j=0;j<m;++j)
+		{
+			if(tmpNeed[index][j] == 0)
+				continue;
+			else
+				break;
+		}
+		if(j == m)   //当前需求全为0
+		{
+			for (int k=0;k<m;++k)
+			{
+				tmpAvail[k] += tmpAlloc[index][k];
+				tmpAlloc[index][k]=0;
+				tmpNeed[index][k]=0;
+			}
+		}
+		//当前需求不全为0则不做任何处理
+	}
+	//开始执行安全性算法
+	bool ret=Safe(tmpAvail,tmpAlloc,tmpNeed);
+	if(ret == true)
+	{
+		//如果试分配成功则更新Available,Allocation,Allocation的状态
+		memmove(Available,tmpAvail,sizeof(int)*MAXRESOURCE);
+		memmove(Allocation,tmpAlloc,sizeof(int)*MAXPROCESS*MAXRESOURCE);
+		memmove(Need,tmpNeed,sizeof(int)*MAXPROCESS*MAXRESOURCE);
+		cout<<"进程p"<<index<<"请求资源允许"<<endl;
+	}
+	else
+	{
+		//只要试分配失败则将Finish置为false
+		for(int i = 0; i < n; ++i)  
+		{  
+			Finish[i] = false;  
+		}  
+		cout<<"第三次试分配失败"<<endl;
+	}
+}
+
+void Menu()
+{
+	cout<<"*************银行家算法*************"<<endl;
+	cout<<"**********1.测试安全性代码**********"<<endl;
+	cout<<"**********2.测试银行家算法**********"<<endl;
+	cout<<"**********3.初始化******************"<<endl;
+	cout<<"**********4.打印矩阵****************"<<endl;
+	cout<<"**********0.退出********************"<<endl;
 }
