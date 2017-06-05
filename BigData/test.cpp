@@ -53,7 +53,13 @@ void testDiv()
 {
 	BigData b1("22222222222222222222222222");
 	BigData b2("33");
+	BigData b3("100000000000000000000000000000001");
+	BigData b4("-1");
+	BigData b5("99");
+	BigData b6("999999999999999999999999999999999");
 	cout<<b1/b2<<endl;
+	cout<<b3/b4<<endl;
+	cout<<b5/b6<<endl;
 }
 
 int main()

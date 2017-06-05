@@ -357,7 +357,7 @@ bool BigData::IsLeftLarge(const char *pleft,const size_t dataLen,const char *pri
 		return true;
 	else if(dataLen == rightsize)
 	{
-		if(strncmp(pleft,pright,dataLen) > 0)
+		if(strncmp(pleft,pright,dataLen) >= 0)
 			return true;
 	}
 	return false;
