@@ -25,8 +25,8 @@ void SwapSort(char *pArr,int *pPos,int n)
 {
 	int i=0;
 	char tmp=0;
-	int count=0;    //¼ÇÂ¼ÅÅĞò¹ıµÄÊı¾İ¸öÊı
-	int flag=0;     //±ê¼Ç¿ÓµÄÎ»ÖÃ
+	int count=0;    //è®°å½•æ’åºè¿‡çš„æ•°æ®ä¸ªæ•°
+	int flag=0;     //æ ‡è®°å‘çš„ä½ç½®
 	assert(pArr);
 	assert(pPos);
 	while (count < n)
@@ -45,13 +45,13 @@ void SwapSort(char *pArr,int *pPos,int n)
 				pArr[i]=pArr[pPos[i]];
 				i=pPos[i];
 				count++;
-				if(flag == pPos[i])    //Èç¹û´ËÎ»ÖÃÇ¡ºÃÒªÌîtmp
+				if(flag == pPos[i])    //å¦‚æœæ­¤ä½ç½®æ°å¥½è¦å¡«tmp
 					break;
 			}
 			pArr[i]=tmp;
 			count++;
-			//Èç¹ûtmp²»ÊÇÔÚ×îºóÒ»´Î²Å±»ÌîÈëÕıÈ·µÄÎ»ÖÃ
-			//´Óµ±Ç°¿ÓµÄÏÂÒ»¸öÎ»ÖÃ×öĞÂµÄ¿Ó
+			//å¦‚æœtmpä¸æ˜¯åœ¨æœ€åä¸€æ¬¡æ‰è¢«å¡«å…¥æ­£ç¡®çš„ä½ç½®
+			//ä»å½“å‰å‘çš„ä¸‹ä¸€ä¸ªä½ç½®åšæ–°çš„å‘
 			i=flag+1;
 		}
 	}
